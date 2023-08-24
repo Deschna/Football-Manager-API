@@ -5,7 +5,6 @@ import com.example.footballmanager.dto.request.PlayerRequestDto;
 import com.example.footballmanager.dto.response.PlayerResponseDto;
 import com.example.footballmanager.model.Player;
 import com.example.footballmanager.service.TeamService;
-import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

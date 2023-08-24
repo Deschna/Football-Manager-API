@@ -5,9 +5,10 @@ import com.example.footballmanager.dto.request.TeamRequestDto;
 import com.example.footballmanager.dto.response.TeamResponseDto;
 import com.example.footballmanager.model.Team;
 import com.example.footballmanager.service.TeamService;
+import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -35,11 +36,13 @@ public class TeamController {
         this.teamDtoMapper = teamDtoMapper;
     }
 
+    @Operation(description = "Get team by ID")
     @GetMapping("/{id}")
     public TeamResponseDto getTeamById(@PathVariable Long id) {
         return teamDtoMapper.toResponseDto(teamService.getById(id));
     }
 
+    @Operation(description = "Get all teams")
     @GetMapping("/all")
     public List<TeamResponseDto> getAllTeams(
             @RequestParam(defaultValue = "0") int page,
@@ -52,16 +55,19 @@ public class TeamController {
                 .collect(Collectors.toList());
     }
 
+    @Operation(description = "Create a new team")
     @PostMapping
     public TeamResponseDto createTeam(@RequestBody @Valid TeamRequestDto requestDto) {
         return teamDtoMapper.toResponseDto(teamService.create(teamDtoMapper.toModel(requestDto)));
     }
 
+    @Operation(description = "Update team by ID")
     @PutMapping("/{id}")
     public TeamResponseDto updateTeamById(@PathVariable Long id, @RequestBody @Valid TeamRequestDto requestDto) {
         return teamDtoMapper.toResponseDto(teamService.updateById(id, teamDtoMapper.toModel(requestDto)));
     }
 
+    @Operation(description = "Delete team by ID")
     @DeleteMapping("/{id}")
     public void deleteTeamById(@PathVariable Long id) {
         teamService.deleteById(id);

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -22,7 +22,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex,
             HttpHeaders headers,
-            HttpStatus status,
+            HttpStatusCode status,
             WebRequest request
     ) {
         Map<String, Object> body = new LinkedHashMap<>();
@@ -42,7 +42,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         body.put("timestamp", LocalDateTime.now());
         body.put("status", 400);
         body.put("error", ex.getMessage());
-        return new ResponseEntity<>(body, HttpStatus.valueOf(400));
+        return new ResponseEntity<>(body, HttpStatusCode.valueOf(400));
     }
 
     @ExceptionHandler(NoSuchElementException.class)
@@ -51,7 +51,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         body.put("timestamp", LocalDateTime.now());
         body.put("status", 404);
         body.put("error", ex.getMessage());
-        return new ResponseEntity<>(body, HttpStatus.valueOf(404));
+        return new ResponseEntity<>(body, HttpStatusCode.valueOf(404));
     }
 
     private String getErrorMessage(ObjectError e) {
@@ -61,4 +61,3 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return e.getDefaultMessage();
     }
 }
-

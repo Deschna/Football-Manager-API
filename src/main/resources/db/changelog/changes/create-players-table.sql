@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS players (
     birth_date DATE,
     career_start_date DATE,
     team_id BIGINT,
-    CONSTRAINT fk_team FOREIGN KEY (team_id) REFERENCES teams(id)
+    CONSTRAINT fk_team FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 --rollback DROP TABLE players;

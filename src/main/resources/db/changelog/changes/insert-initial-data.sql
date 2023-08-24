@@ -2,9 +2,9 @@
 --changeset deschna:insert_initial_data splitStatements:true endDelimiter:;
 
 INSERT INTO teams (id, name, player_transfer_commission, budget) VALUES
-    (1, 'Real Madrid', 0.15, 800000.00),
-    (2, 'Barcelona', 0.10, 700000.00),
-    (3, 'Manchester United', 0.12, 900000.00);
+    (1, 'Real Madrid', 10, 800000.00),
+    (2, 'Barcelona', 7, 700000.00),
+    (3, 'Manchester United', 5, 900000.00);
 
 INSERT INTO players (id, firstname, lastname, birth_date, career_start_date, team_id) VALUES
     (1, 'Cristiano', 'Ronaldo', '1985-02-05', '2002-08-01', 1),

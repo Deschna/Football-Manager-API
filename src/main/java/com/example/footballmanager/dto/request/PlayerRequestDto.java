@@ -1,12 +1,12 @@
 package com.example.footballmanager.dto.request;
 
+import com.example.footballmanager.validation.PastOrPresent;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
-import javax.validation.constraints.Positive;
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
 
 @Data
 public class PlayerRequestDto {
@@ -18,12 +18,10 @@ public class PlayerRequestDto {
 
     @NotNull(message = "Birth date is required")
     @Past(message = "Birth date must be in the past")
-    @DateTimeFormat(pattern = "dd-MM-yyyy")
     private LocalDate birthDate;
 
     @NotNull(message = "Career start date is required")
-    @Past(message = "Career start date must be in the past")
-    @DateTimeFormat(pattern = "dd-MM-yyyy")
+    @PastOrPresent(message = "Career start date can't be in the future")
     private LocalDate careerStartDate;
 
     @Positive

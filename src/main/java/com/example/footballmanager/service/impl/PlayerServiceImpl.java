@@ -70,8 +70,6 @@ public class PlayerServiceImpl implements PlayerService {
     @Transactional
     @Override
     public Player transferPlayerToTeam(Player player, Team buyingTeam) {
-        BigDecimal transferFee = calculateTransferFee(player);
-
         Team sellingTeam = player.getTeam();
         if (sellingTeam == null) {
             throw new IllegalArgumentException("Player does not belong to any team");
@@ -79,6 +77,7 @@ public class PlayerServiceImpl implements PlayerService {
         if (player.getTeam().getId().equals(buyingTeam.getId())) {
             throw new IllegalArgumentException("Can't transfer a player to a team he's already on");
         }
+        BigDecimal transferFee = calculateTransferFee(player);
         if (buyingTeam.getBudget().compareTo(transferFee) < 0) {
             throw new IllegalArgumentException("Insufficient funds in the team's budget");
         }
