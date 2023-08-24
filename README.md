@@ -4,12 +4,12 @@ The Football Manager API designed for managing football teams and players. It of
 
 # Features
 
-* `CRUD Operations: Perform Create, Read, Update, and Delete operations on players and teams`
-* `Pagination: Retrieve data in paginated sets using pageable queries`
-* `Player Management: Attach players to teams and execute player transfers`
-* `Team Budgets: Manage individual team budgets for transfer activities`
-* `Initial Data: The database is preloaded with initial data using Liquibase`
-* `Docker Compatibility: The application is containerized and can be launched using Docker`
+* `CRUD Operations:` Perform Create, Read, Update, and Delete operations on players and teams
+* `Pagination:` Retrieve data in paginated sets using pageable queries
+* `Player Management:` Attach players to teams and execute player transfers
+* `Team Budgets:` Manage individual team budgets for transfer activities
+* `Initial Data:` The database is preloaded with initial data using Liquibase
+* `Docker Compatibility:` The application is containerized and can be launched using Docker
 
 
 # Getting Started
@@ -41,3 +41,8 @@ The Football Manager API designed for managing football teams and players. It of
 * Project Lombok `1.18.28`
 * Liquibase `v.4.23.0`
 * Maven `v.3.8.7`
+
+
+## Authors
+
+[Déschna (Ditkovskyi Pasha)](https://github.com/Deschna)
