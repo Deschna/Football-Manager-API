@@ -55,7 +55,7 @@ public class PlayerController {
     }
 
     @Operation(description = "Get all players by team ID")
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<List<PlayerResponseDto>> getAllPlayersByTeamId(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
