@@ -1,5 +1,10 @@
 package com.example.footballmanager.service.impl;
 
+import com.example.footballmanager.exception.InsufficientBudgetException;
+import com.example.footballmanager.exception.PlayerAlreadyExistsException;
+import com.example.footballmanager.exception.PlayerAlreadyOnTeamException;
+import com.example.footballmanager.exception.PlayerNotFoundException;
+import com.example.footballmanager.exception.TeamNotFoundException;
 import com.example.footballmanager.model.Player;
 import com.example.footballmanager.model.Team;
 import com.example.footballmanager.repository.PlayerRepository;
@@ -8,7 +13,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +29,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public Player getById(Long id) {
         return playerRepository.findById(id).orElseThrow(
-                () -> new NoSuchElementException("No player present with id " + id));
+                () -> new PlayerNotFoundException("No player present with id " + id));
     }
 
     @Override
@@ -36,7 +40,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public Player create(Player player) {
         if (player.getId() != null) {
-            throw new IllegalArgumentException("Can't save a new player with an existing id");
+            throw new PlayerAlreadyExistsException("Can't save a new player with an existing id");
         }
         return playerRepository.save(player);
     }
@@ -44,7 +48,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public Player updateById(Long id, Player player) {
         if(!playerRepository.existsById(id)) {
-            throw new NoSuchElementException("No player present with id " + id);
+            throw new PlayerNotFoundException("No player present with id " + id);
         }
         player.setId(id);
         return playerRepository.save(player);
@@ -53,7 +57,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public void deleteById(Long id) {
         if(!playerRepository.existsById(id)) {
-            throw new NoSuchElementException("No player present with id " + id);
+            throw new PlayerNotFoundException("No player present with id " + id);
         }
         playerRepository.deleteById(id);
     }
@@ -61,7 +65,7 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public Player addUnassignedPlayerToTeam(Player player, Team team) {
         if (player.getTeam() != null) {
-            throw new IllegalArgumentException("The player is already on the team");
+            throw new PlayerAlreadyOnTeamException("The player is already on the team");
         }
         player.setTeam(team);
         return updateById(player.getId(), player);
@@ -72,14 +76,14 @@ public class PlayerServiceImpl implements PlayerService {
     public Player transferPlayerToTeam(Player player, Team buyingTeam) {
         Team sellingTeam = player.getTeam();
         if (sellingTeam == null) {
-            throw new IllegalArgumentException("Player does not belong to any team");
+            throw new TeamNotFoundException("Player does not belong to any team");
         }
         if (player.getTeam().getId().equals(buyingTeam.getId())) {
-            throw new IllegalArgumentException("Can't transfer a player to a team he's already on");
+            throw new PlayerAlreadyOnTeamException("Can't transfer a player to a team he's already on");
         }
         BigDecimal transferFee = calculateTransferFee(player);
         if (buyingTeam.getBudget().compareTo(transferFee) < 0) {
-            throw new IllegalArgumentException("Insufficient funds in the team's budget");
+            throw new InsufficientBudgetException("Insufficient funds in the team's budget");
         }
         buyingTeam.setBudget(buyingTeam.getBudget().subtract(transferFee));
         sellingTeam.setBudget(sellingTeam.getBudget().add(transferFee));
