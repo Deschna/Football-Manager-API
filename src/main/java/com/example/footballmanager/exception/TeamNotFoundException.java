@@ -1,6 +1,8 @@
 package com.example.footballmanager.exception;
 
-public class TeamNotFoundException extends RuntimeException {
+import java.util.NoSuchElementException;
+
+public class TeamNotFoundException extends NoSuchElementException {
     public TeamNotFoundException(String message) {
         super(message);
     }
