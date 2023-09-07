@@ -19,7 +19,7 @@ The Football Manager API designed for managing football teams and players. It of
 * Launch the `Docker` on your device.
 * Run the command: `docker-compose up` (It is necessary to allow time for the MySQL container to fully start, because of which the container with the application may restart several times with an error).
 * You can explore all endpoints conveniently using the integrated Swagger UI at http://localhost:6868/swagger-ui/index.html.
-* If you are not going to run the application in a Docker container, you must enter credentials in `resources\application.properties` and `resources\db\liquibase.properties` to connect your MySQL database
+* If you are not going to run the application in a Docker container, you must enter credentials in `resources\application.properties` to connect your MySQL database and change the port in the URL from `6868` to `8080`
 
 
 # Structure
@@ -39,6 +39,7 @@ The Football Manager API designed for managing football teams and players. It of
 * SpringDoc `2.2.0`
 * MySQL Connector `8.0.33`
 * Project Lombok `1.18.28`
+* MapStruct `v1.5.5`
 * Liquibase `v.4.23.0`
 * Maven `v.3.8.7`
 

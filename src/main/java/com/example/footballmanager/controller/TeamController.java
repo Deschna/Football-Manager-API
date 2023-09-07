@@ -6,12 +6,14 @@ import com.example.footballmanager.dto.response.TeamResponseDto;
 import com.example.footballmanager.model.Team;
 import com.example.footballmanager.service.TeamService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
-import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,38 +40,49 @@ public class TeamController {
 
     @Operation(description = "Get team by ID")
     @GetMapping("/{id}")
-    public TeamResponseDto getTeamById(@PathVariable Long id) {
-        return teamDtoMapper.toResponseDto(teamService.getById(id));
+    public ResponseEntity<TeamResponseDto> getTeamById(@PathVariable Long id) {
+        Team team = teamService.getById(id);
+        if (team == null) {
+            return ResponseEntity.notFound().build();
+        }
+        TeamResponseDto responseDto = teamDtoMapper.toResponseDto(team);
+        return ResponseEntity.ok(responseDto);
     }
 
     @Operation(description = "Get all teams")
-    @GetMapping("/all")
-    public List<TeamResponseDto> getAllTeams(
+    @GetMapping
+    public ResponseEntity<List<TeamResponseDto>> getAllTeams(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id"));
-        return teamService.getAll(pageable)
+        List<TeamResponseDto> teamResponseDtos = teamService.getAll(pageable)
                 .stream()
                 .map(teamDtoMapper::toResponseDto)
                 .collect(Collectors.toList());
+        return ResponseEntity.ok(teamResponseDtos);
     }
 
     @Operation(description = "Create a new team")
     @PostMapping
-    public TeamResponseDto createTeam(@RequestBody @Valid TeamRequestDto requestDto) {
-        return teamDtoMapper.toResponseDto(teamService.create(teamDtoMapper.toModel(requestDto)));
+    public ResponseEntity<TeamResponseDto> createTeam(@RequestBody @Valid TeamRequestDto requestDto) {
+        Team team = teamService.create(teamDtoMapper.toModel(requestDto));
+        TeamResponseDto responseDto = teamDtoMapper.toResponseDto(team);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
     @Operation(description = "Update team by ID")
     @PutMapping("/{id}")
-    public TeamResponseDto updateTeamById(@PathVariable Long id, @RequestBody @Valid TeamRequestDto requestDto) {
-        return teamDtoMapper.toResponseDto(teamService.updateById(id, teamDtoMapper.toModel(requestDto)));
+    public ResponseEntity<TeamResponseDto> updateTeamById(@PathVariable Long id, @RequestBody @Valid TeamRequestDto requestDto) {
+        Team updatedTeam = teamService.updateById(id, teamDtoMapper.toModel(requestDto));
+        TeamResponseDto responseDto = teamDtoMapper.toResponseDto(updatedTeam);
+        return ResponseEntity.ok(responseDto);
     }
 
     @Operation(description = "Delete team by ID")
     @DeleteMapping("/{id}")
-    public void deleteTeamById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteTeamById(@PathVariable Long id) {
         teamService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
