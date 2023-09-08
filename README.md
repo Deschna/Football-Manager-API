@@ -39,9 +39,11 @@ The Football Manager API designed for managing football teams and players. It of
 * SpringDoc `2.2.0`
 * MySQL Connector `8.0.33`
 * Project Lombok `1.18.28`
-* MapStruct `v1.5.5`
-* Liquibase `v.4.23.0`
-* Maven `v.3.8.7`
+* MapStruct `1.5.5`
+* Liquibase `4.23.0`
+* Maven `3.8.7`
+* JUnit `4.13.2`
+* Mockito `5.5.0`
 
 
 ## Authors
