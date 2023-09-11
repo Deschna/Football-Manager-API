@@ -21,7 +21,7 @@ public class CareerStartDateValidatorTest {
     }
 
     @Test
-    public void testValidPastDate() {
+    public void testValidPastDate_Ok() {
         LocalDate validDate = LocalDate.now().minusDays(1);
 
         TestClass testObject = new TestClass(validDate);
@@ -31,7 +31,7 @@ public class CareerStartDateValidatorTest {
     }
 
     @Test
-    public void testValidToday() {
+    public void testValidToday_Ok() {
         LocalDate validDate = LocalDate.now();
 
         TestClass testObject = new TestClass(validDate);
@@ -41,7 +41,7 @@ public class CareerStartDateValidatorTest {
     }
 
     @Test
-    public void testInvalidFutureDate() {
+    public void testInvalidFutureDate_NotOk() {
         LocalDate futureDate = LocalDate.now().plusDays(1);
 
         TestClass testObject = new TestClass(futureDate);
@@ -51,7 +51,7 @@ public class CareerStartDateValidatorTest {
     }
 
     @Test
-    public void testInvalidNullDate() {
+    public void testInvalidNullDate_NotOk() {
         TestClass testObject = new TestClass(null);
         Set<ConstraintViolation<TestClass>> violations = validator.validate(testObject);
 

@@ -5,6 +5,7 @@ import com.example.footballmanager.exception.TeamNotFoundException;
 import com.example.footballmanager.model.Team;
 import com.example.footballmanager.repository.TeamRepository;
 import com.example.footballmanager.service.TeamService;
+import java.math.BigDecimal;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,108 +14,106 @@ import org.mockito.MockitoAnnotations;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class TeamServiceImplTest {
     @Mock
     private TeamRepository teamRepository;
     private TeamService teamService;
+    private final Team teamWithId;
+    private final Team teamWithoutInitialId;
+    private static final Long DEFAULT_TEAM_ID = 1L;
+    private static final String DEFAULT_TEAM_NAME = "Test Team";
+    private static final BigDecimal DEFAULT_TEAM_BUDGET = BigDecimal.valueOf(1000000);
+    private static final BigDecimal DEFAULT_TEAM_TRANSFER_COMMISSION = BigDecimal.valueOf(5);
+
+    public TeamServiceImplTest() {
+        teamWithId = new Team();
+        teamWithoutInitialId = new Team();
+    }
 
     @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         teamService = new TeamServiceImpl(teamRepository);
+
+        teamWithId.setId(DEFAULT_TEAM_ID);
+        teamWithId.setName(DEFAULT_TEAM_NAME);
+        teamWithId.setBudget(DEFAULT_TEAM_BUDGET);
+        teamWithId.setPlayerTransferCommission(DEFAULT_TEAM_TRANSFER_COMMISSION);
+
+        teamWithoutInitialId.setId(null);
+        teamWithoutInitialId.setName(DEFAULT_TEAM_NAME);
+        teamWithoutInitialId.setBudget(DEFAULT_TEAM_BUDGET);
+        teamWithoutInitialId.setPlayerTransferCommission(DEFAULT_TEAM_TRANSFER_COMMISSION);
     }
 
     @Test
-    public void testGetById() {
-        Long teamId = 1L;
-        Team expectedTeam = new Team();
-        expectedTeam.setId(teamId);
+    public void testGetById_Ok() {
+        when(teamRepository.findById(DEFAULT_TEAM_ID)).thenReturn(Optional.of(teamWithId));
 
-        when(teamRepository.findById(teamId)).thenReturn(Optional.of(expectedTeam));
-
-        Team actualTeam = teamService.getById(teamId);
+        Team actualTeam = teamService.getById(DEFAULT_TEAM_ID);
 
         assertNotNull(actualTeam);
-        assertEquals(expectedTeam, actualTeam);
+        assertEquals(teamWithId, actualTeam);
     }
 
     @Test
-    public void testGetByIdNotFound() {
-        Long teamId = 1L;
+    public void testGetByIdNotFound_NotOk() {
+        when(teamRepository.findById(DEFAULT_TEAM_ID)).thenReturn(Optional.empty());
 
-        when(teamRepository.findById(teamId)).thenReturn(Optional.empty());
-
-        assertThrows(TeamNotFoundException.class, () -> teamService.getById(teamId));
+        assertThrows(TeamNotFoundException.class, () -> teamService.getById(DEFAULT_TEAM_ID));
     }
 
     @Test
-    public void testCreate() {
-        Team newTeam = new Team();
-        newTeam.setName("New Team");
+    public void testCreate_Ok() {
+        when(teamRepository.save(teamWithoutInitialId)).thenReturn(teamWithId);
 
-        when(teamRepository.save(newTeam)).thenReturn(newTeam);
-
-        Team createdTeam = teamService.create(newTeam);
+        Team createdTeam = teamService.create(teamWithoutInitialId);
 
         assertNotNull(createdTeam);
-        assertEquals(newTeam.getName(), createdTeam.getName());
+        assertEquals(teamWithId, createdTeam);
     }
 
     @Test
-    public void testCreateWithId() {
-        Team teamWithId = new Team();
-        teamWithId.setId(1L);
-
+    public void testCreateWithId_NotOk() {
         assertThrows(TeamAlreadyExistsException.class, () -> teamService.create(teamWithId));
     }
 
     @Test
-    public void testUpdateById() {
-        Long teamId = 1L;
-        Team existingTeam = new Team();
-        existingTeam.setId(teamId);
+    public void testUpdateById_Ok() {
+        when(teamRepository.existsById(DEFAULT_TEAM_ID)).thenReturn(true);
+        when(teamRepository.save(teamWithoutInitialId)).thenReturn(teamWithoutInitialId);
 
-        Team updatedTeam = new Team();
-        updatedTeam.setId(teamId);
-        updatedTeam.setName("Updated Team");
+        Team updatedTeam = teamService.updateById(DEFAULT_TEAM_ID, teamWithoutInitialId);
 
-        when(teamRepository.existsById(teamId)).thenReturn(true);
-        when(teamRepository.save(updatedTeam)).thenReturn(updatedTeam);
-
-        Team result = teamService.updateById(teamId, updatedTeam);
-
-        assertNotNull(result);
-        assertEquals(updatedTeam.getName(), result.getName());
+        assertNotNull(updatedTeam);
+        assertEquals(DEFAULT_TEAM_ID, updatedTeam.getId());
     }
 
     @Test
-    public void testUpdateByIdNotFound() {
-        Long teamId = 1L;
-        Team updatedTeam = new Team();
-        updatedTeam.setId(teamId);
+    public void testUpdateByIdNotFound_NotOk() {
+        when(teamRepository.existsById(DEFAULT_TEAM_ID)).thenReturn(false);
 
-        when(teamRepository.existsById(teamId)).thenReturn(false);
-
-        assertThrows(TeamNotFoundException.class, () -> teamService.updateById(teamId, updatedTeam));
+        assertThrows(TeamNotFoundException.class, () -> teamService.updateById(DEFAULT_TEAM_ID, teamWithoutInitialId));
     }
 
     @Test
-    public void testDeleteById() {
-        Long teamId = 1L;
+    public void testDeleteById_Ok() {
+        when(teamRepository.existsById(DEFAULT_TEAM_ID)).thenReturn(true);
 
-        when(teamRepository.existsById(teamId)).thenReturn(true);
+        teamService.deleteById(DEFAULT_TEAM_ID);
 
-        teamService.deleteById(teamId);
+        verify(teamRepository, times(1)).deleteById(DEFAULT_TEAM_ID);
     }
 
     @Test
-    public void testDeleteByIdNotFound() {
-        Long teamId = 1L;
+    public void testDeleteByIdNotFound_NotOk() {
+        when(teamRepository.existsById(DEFAULT_TEAM_ID)).thenReturn(false);
 
-        when(teamRepository.existsById(teamId)).thenReturn(false);
-
-        assertThrows(TeamNotFoundException.class, () -> teamService.deleteById(teamId));
+        assertThrows(TeamNotFoundException.class, () -> teamService.deleteById(DEFAULT_TEAM_ID));
+        verify(teamRepository, times(0)).deleteById(DEFAULT_TEAM_ID);
     }
 }

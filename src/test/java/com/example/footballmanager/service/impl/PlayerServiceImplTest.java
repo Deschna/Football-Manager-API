@@ -19,206 +19,191 @@ import org.mockito.MockitoAnnotations;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class PlayerServiceImplTest {
     @Mock
     private PlayerRepository playerRepository;
-
     private PlayerService playerService;
+    private final Player playerWithId;
+    private final Player playerWithoutInitialId;
+    private final Team buyingTeam;
+    private final Team sellingTeam;
+    private static final Long DEFAULT_PLAYER_ID = 1L;
+    private static final String DEFAULT_PLAYER_FIRST_NAME = "FirstName";
+    private static final String DEFAULT_PLAYER_LAST_NAME = "LastName";
+    private static final LocalDate DEFAULT_PLAYER_CAREER_START_DATE = LocalDate.now().minusYears(1);
+    private static final LocalDate DEFAULT_PLAYER_BIRTH_DATE = LocalDate.now().minusYears(30);
+    private static final Long DEFAULT_BUYING_TEAM_ID = 11L;
+    private static final BigDecimal DEFAULT_BUYING_TEAM_BUDGET = new BigDecimal("44000.00");
+    private static final BigDecimal DEFAULT_BUYING_TEAM_BUDGET_AFTER_TRANSFER = new BigDecimal("0.00");
+    private static final Long DEFAULT_SELLING_TEAM_ID = 12L;
+    private static final BigDecimal DEFAULT_SELLING_TEAM_BUDGET = new BigDecimal("0.00");
+    private static final BigDecimal DEFAULT_SELLING_TEAM_BUDGET_AFTER_TRANSFER = new BigDecimal("44000.00");
+    private static final BigDecimal DEFAULT_SELLING_TEAM_TRANSFER_COMMISSION = BigDecimal.valueOf(10);
+
+    public PlayerServiceImplTest() {
+        playerWithId = new Player();
+        playerWithoutInitialId = new Player();
+
+        buyingTeam = new Team();
+        sellingTeam = new Team();
+    }
 
     @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         playerService = new PlayerServiceImpl(playerRepository);
+
+        playerWithId.setId(DEFAULT_PLAYER_ID);
+        playerWithId.setFirstname(DEFAULT_PLAYER_FIRST_NAME);
+        playerWithId.setLastname(DEFAULT_PLAYER_LAST_NAME);
+        playerWithId.setTeam(null);
+        playerWithId.setCareerStartDate(DEFAULT_PLAYER_CAREER_START_DATE);
+        playerWithId.setBirthDate(DEFAULT_PLAYER_BIRTH_DATE);
+
+        playerWithoutInitialId.setId(null);
+        playerWithoutInitialId.setFirstname(DEFAULT_PLAYER_FIRST_NAME);
+        playerWithoutInitialId.setLastname(DEFAULT_PLAYER_LAST_NAME);
+        playerWithoutInitialId.setTeam(null);
+        playerWithoutInitialId.setCareerStartDate(DEFAULT_PLAYER_CAREER_START_DATE);
+        playerWithoutInitialId.setBirthDate(DEFAULT_PLAYER_BIRTH_DATE);
+
+        buyingTeam.setId(DEFAULT_BUYING_TEAM_ID);
+        buyingTeam.setBudget(DEFAULT_BUYING_TEAM_BUDGET);
+
+        sellingTeam.setId(DEFAULT_SELLING_TEAM_ID);
+        sellingTeam.setBudget(DEFAULT_SELLING_TEAM_BUDGET);
+        sellingTeam.setPlayerTransferCommission(DEFAULT_SELLING_TEAM_TRANSFER_COMMISSION);
     }
 
     @Test
-    public void testGetById() {
-        Long playerId = 1L;
-        Player expectedPlayer = new Player();
-        expectedPlayer.setId(playerId);
+    public void testGetById_Ok() {
+        when(playerRepository.findById(DEFAULT_PLAYER_ID)).thenReturn(Optional.of(playerWithId));
 
-        when(playerRepository.findById(playerId)).thenReturn(Optional.of(expectedPlayer));
-
-        Player actualPlayer = playerService.getById(playerId);
+        Player actualPlayer = playerService.getById(DEFAULT_PLAYER_ID);
 
         assertNotNull(actualPlayer);
-        assertEquals(expectedPlayer, actualPlayer);
+        assertEquals(playerWithId, actualPlayer);
     }
 
     @Test
-    public void testGetByIdNotFound() {
-        Long playerId = 1L;
+    public void testGetByIdNotFound_NotOk() {
+        when(playerRepository.findById(DEFAULT_PLAYER_ID)).thenReturn(Optional.empty());
 
-        when(playerRepository.findById(playerId)).thenReturn(Optional.empty());
-
-        assertThrows(PlayerNotFoundException.class, () -> playerService.getById(playerId));
+        assertThrows(PlayerNotFoundException.class, () -> playerService.getById(DEFAULT_PLAYER_ID));
     }
 
     @Test
-    public void testCreate() {
-        Player newPlayer = new Player();
-        newPlayer.setFirstname("New Player");
+    public void testCreate_Ok() {
+        when(playerRepository.save(playerWithoutInitialId)).thenReturn(playerWithId);
 
-        when(playerRepository.save(newPlayer)).thenReturn(newPlayer);
-
-        Player createdPlayer = playerService.create(newPlayer);
+        Player createdPlayer = playerService.create(playerWithoutInitialId);
 
         assertNotNull(createdPlayer);
-        assertEquals(newPlayer.getFirstname(), createdPlayer.getFirstname());
+        assertEquals(playerWithId, createdPlayer);
     }
 
     @Test
-    public void testCreateWithId() {
-        Player playerWithId = new Player();
-        playerWithId.setId(1L);
-
+    public void testCreateWithId_NotOk() {
         assertThrows(PlayerAlreadyExistsException.class, () -> playerService.create(playerWithId));
     }
 
     @Test
-    public void testUpdateById() {
-        Long playerId = 1L;
-        Player existingPlayer = new Player();
-        existingPlayer.setId(playerId);
+    public void testUpdateById_Ok() {
+        when(playerRepository.existsById(DEFAULT_PLAYER_ID)).thenReturn(true);
+        when(playerRepository.save(playerWithoutInitialId)).thenReturn(playerWithoutInitialId);
 
-        Player updatedPlayer = new Player();
-        updatedPlayer.setId(playerId);
-        updatedPlayer.setFirstname("Updated Player");
+        Player updatedPlayer = playerService.updateById(DEFAULT_PLAYER_ID, playerWithoutInitialId);
 
-        when(playerRepository.existsById(playerId)).thenReturn(true);
-        when(playerRepository.save(updatedPlayer)).thenReturn(updatedPlayer);
-
-        Player result = playerService.updateById(playerId, updatedPlayer);
-
-        assertNotNull(result);
-        assertEquals(updatedPlayer.getFirstname(), result.getFirstname());
+        assertNotNull(updatedPlayer);
+        assertEquals(DEFAULT_PLAYER_ID, updatedPlayer.getId());
     }
 
     @Test
-    public void testUpdateByIdNotFound() {
-        Long playerId = 1L;
-        Player updatedPlayer = new Player();
-        updatedPlayer.setId(playerId);
+    public void testUpdateByIdNotFound_NotOk() {
+        when(playerRepository.existsById(DEFAULT_PLAYER_ID)).thenReturn(false);
 
-        when(playerRepository.existsById(playerId)).thenReturn(false);
-
-        assertThrows(PlayerNotFoundException.class, () -> playerService.updateById(playerId, updatedPlayer));
+        assertThrows(PlayerNotFoundException.class,
+                () -> playerService.updateById(DEFAULT_PLAYER_ID, playerWithoutInitialId));
     }
 
     @Test
-    public void testDeleteById() {
-        Long playerId = 1L;
-        when(playerRepository.existsById(playerId)).thenReturn(true);
+    public void testDeleteById_Ok() {
+        when(playerRepository.existsById(DEFAULT_PLAYER_ID)).thenReturn(true);
 
-        playerService.deleteById(playerId);
+        playerService.deleteById(DEFAULT_PLAYER_ID);
+
+        verify(playerRepository, times(1)).deleteById(DEFAULT_PLAYER_ID);
     }
 
     @Test
-    public void testDeleteByIdNotFound() {
-        Long playerId = 1L;
-        when(playerRepository.existsById(playerId)).thenReturn(false);
+    public void testDeleteByIdNotFound_NotOk() {
+        when(playerRepository.existsById(DEFAULT_PLAYER_ID)).thenReturn(false);
 
-        assertThrows(PlayerNotFoundException.class, () -> playerService.deleteById(playerId));
+        assertThrows(PlayerNotFoundException.class, () -> playerService.deleteById(DEFAULT_PLAYER_ID));
+
+        verify(playerRepository, times(0)).deleteById(DEFAULT_PLAYER_ID);
     }
 
     @Test
-    public void testAddUnassignedPlayerToTeam() {
-        Player player = new Player();
-        Team team = new Team();
+    public void testAddUnassignedPlayerToTeam_Ok() {
+        when(playerRepository.existsById(DEFAULT_PLAYER_ID)).thenReturn(true);
+        when(playerRepository.save(playerWithId)).thenReturn(playerWithId);
 
-        when(playerRepository.existsById(player.getId())).thenReturn(true);
-        when(playerRepository.save(player)).thenReturn(player);
+        Player resultPlayer = playerService.addUnassignedPlayerToTeam(playerWithId, buyingTeam);
 
-        Player resultPlayer = playerService.addUnassignedPlayerToTeam(player, team);
-
-        assertNotNull(resultPlayer);
-        assertEquals(team, resultPlayer.getTeam());
-    }
-
-    @Test
-    public void testAddUnassignedPlayerToTeamAlreadyOnTeam() {
-        Team team = new Team();
-        Long teamId = 1L;
-        team.setId(teamId);
-
-        Player playerWithTeam = new Player();
-        playerWithTeam.setTeam(team);
-
-        assertThrows(PlayerAlreadyOnTeamException.class,
-                () -> playerService.addUnassignedPlayerToTeam(playerWithTeam, team));
-    }
-
-    @Test
-    public void testTransferPlayerToTeam() {
-        BigDecimal playerCost = new BigDecimal("44000.00");
-        BigDecimal zeroCost = new BigDecimal("0.00");
-
-        Team buyingTeam = new Team();
-        buyingTeam.setId(1L);
-        buyingTeam.setBudget(playerCost);
-
-        Team sellingTeam = new Team();
-        sellingTeam.setId(2L);
-        sellingTeam.setBudget(zeroCost);
-        sellingTeam.setPlayerTransferCommission(BigDecimal.valueOf(10));
-
-        Player player = new Player();
-        player.setId(1L);
-        player.setTeam(sellingTeam);
-        player.setCareerStartDate(LocalDate.now().minusYears(1));
-        player.setBirthDate(LocalDate.now().minusYears(30));
-
-        when(playerRepository.existsById(player.getId())).thenReturn(true);
-        when(playerRepository.save(player)).thenReturn(player);
-
-        Player resultPlayer = playerService.transferPlayerToTeam(player, buyingTeam);
-
-        assertEquals(zeroCost, buyingTeam.getBudget());
-        assertEquals(playerCost, sellingTeam.getBudget());
         assertNotNull(resultPlayer);
         assertEquals(buyingTeam, resultPlayer.getTeam());
     }
 
     @Test
-    public void testTransferPlayerToTeamNotBelongToTeam() {
-        Player player = new Player();
-        Team buyingTeam = new Team();
+    public void testAddPlayerAlreadyInTeamToAnotherTeam_NotOk() {
+        playerWithId.setTeam(sellingTeam);
 
-        assertThrows(TeamNotFoundException.class, () -> playerService.transferPlayerToTeam(player, buyingTeam));
+        assertThrows(PlayerAlreadyOnTeamException.class,
+                () -> playerService.addUnassignedPlayerToTeam(playerWithId, buyingTeam));
     }
 
     @Test
-    public void testTransferPlayerToTeamAlreadyOnTeam() {
-        Team buyingTeam = new Team();
-        buyingTeam.setId(1L);
+    public void testTransferPlayerToTeam_Ok() {
+        playerWithId.setTeam(sellingTeam);
 
-        Player player = new Player();
-        player.setTeam(buyingTeam);
+        when(playerRepository.existsById(DEFAULT_PLAYER_ID)).thenReturn(true);
+        when(playerRepository.save(playerWithId)).thenReturn(playerWithId);
 
-        assertThrows(PlayerAlreadyOnTeamException.class, () -> playerService.transferPlayerToTeam(player, buyingTeam));
+        Player resultPlayer = playerService.transferPlayerToTeam(playerWithId, buyingTeam);
+
+        assertEquals(DEFAULT_BUYING_TEAM_BUDGET_AFTER_TRANSFER, buyingTeam.getBudget());
+        assertEquals(DEFAULT_SELLING_TEAM_BUDGET_AFTER_TRANSFER, sellingTeam.getBudget());
+        assertNotNull(resultPlayer);
+        assertEquals(buyingTeam, resultPlayer.getTeam());
     }
 
     @Test
-    public void testTransferPlayerToTeamInsufficientBudget() {
-        Team buyingTeam = new Team();
-        buyingTeam.setId(1L);
+    public void testTransferPlayerToTeamNotBelongToTeam_NotOk() {
+        assertThrows(TeamNotFoundException.class, () -> playerService.transferPlayerToTeam(playerWithId, buyingTeam));
+    }
 
-        Team sellingTeam = new Team();
-        sellingTeam.setId(2L);
-        sellingTeam.setPlayerTransferCommission(BigDecimal.valueOf(10));
+    @Test
+    public void testTransferPlayerToTeamHeAlreadyOn_NotOk() {
+        playerWithId.setTeam(buyingTeam);
 
-        Player player = new Player();
-        player.setTeam(sellingTeam);
-        player.setCareerStartDate(LocalDate.now().minusYears(1));
-        player.setBirthDate(LocalDate.now().minusYears(30));
+        assertThrows(PlayerAlreadyOnTeamException.class,
+                () -> playerService.transferPlayerToTeam(playerWithId, buyingTeam));
+    }
 
-        buyingTeam.setBudget(BigDecimal.valueOf(100));
+    @Test
+    public void testTransferPlayerToTeamInsufficientBudget_NotOk() {
+        playerWithId.setTeam(sellingTeam);
+        buyingTeam.setBudget(BigDecimal.ZERO);
 
-        when(playerRepository.existsById(player.getId())).thenReturn(true);
-        when(playerRepository.save(player)).thenReturn(player);
+        when(playerRepository.existsById(DEFAULT_PLAYER_ID)).thenReturn(true);
+        when(playerRepository.save(playerWithId)).thenReturn(playerWithId);
 
-        assertThrows(InsufficientBudgetException.class, () -> playerService.transferPlayerToTeam(player, buyingTeam));
+        assertThrows(InsufficientBudgetException.class,
+                () -> playerService.transferPlayerToTeam(playerWithId, buyingTeam));
     }
 }
