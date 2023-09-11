@@ -10,7 +10,7 @@ The Football Manager API designed for managing football teams and players. It of
 * `Team Budgets:` Manage individual team budgets for transfer activities
 * `Initial Data:` The database is preloaded with initial data using Liquibase
 * `Docker Compatibility:` The application is containerized and can be launched using Docker
-* `Controller and Service Layer Tests` The project includes comprehensive tests for both the controller and service layers to ensure functionality and reliability.
+* `Controller and Service Layer Tests:` The project includes comprehensive tests for both the controller and service layers to ensure functionality and reliability.
 
 
 # Getting Started
