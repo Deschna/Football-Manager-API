@@ -114,6 +114,7 @@ public class TeamServiceImplTest {
         when(teamRepository.existsById(DEFAULT_TEAM_ID)).thenReturn(false);
 
         assertThrows(EntityNotFoundException.class, () -> teamService.deleteById(DEFAULT_TEAM_ID));
+      
         verify(teamRepository, times(0)).deleteById(DEFAULT_TEAM_ID);
     }
 }
