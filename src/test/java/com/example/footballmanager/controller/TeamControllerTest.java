@@ -3,7 +3,7 @@ package com.example.footballmanager.controller;
 import com.example.footballmanager.dto.mapper.DtoMapper;
 import com.example.footballmanager.dto.request.TeamRequestDto;
 import com.example.footballmanager.dto.response.TeamResponseDto;
-import com.example.footballmanager.exception.TeamNotFoundException;
+import com.example.footballmanager.exception.EntityNotFoundException;
 import com.example.footballmanager.model.Team;
 import com.example.footballmanager.service.TeamService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -91,7 +91,7 @@ public class TeamControllerTest {
     @Test
     public void testGetByIdNotFound_NotOk() throws Exception {
         when(teamService.getById(DEFAULT_TEAM_ID))
-                .thenThrow(new TeamNotFoundException("No team present with id " + DEFAULT_TEAM_ID));
+                .thenThrow(new EntityNotFoundException("No team present with id " + DEFAULT_TEAM_ID));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/teams/" + DEFAULT_TEAM_ID)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -173,7 +173,7 @@ public class TeamControllerTest {
     public void testUpdateTeamByIdNotFound_NotOk() throws Exception {
         when(teamDtoMapper.toModel(teamRequestDto)).thenReturn(team);
         when(teamService.updateById(DEFAULT_TEAM_ID, team))
-                .thenThrow(new TeamNotFoundException("No team present with id " + DEFAULT_TEAM_ID));
+                .thenThrow(new EntityNotFoundException("No team present with id " + DEFAULT_TEAM_ID));
 
         mockMvc.perform(MockMvcRequestBuilders.put("/teams/" + DEFAULT_TEAM_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -192,7 +192,7 @@ public class TeamControllerTest {
 
     @Test
     public void testDeleteTeamByIdNotFound_NotOk() throws Exception {
-        doThrow(new TeamNotFoundException("No team present with id " + DEFAULT_TEAM_ID))
+        doThrow(new EntityNotFoundException("No team present with id " + DEFAULT_TEAM_ID))
                 .when(teamService).deleteById(DEFAULT_TEAM_ID);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/teams/" + DEFAULT_TEAM_ID)

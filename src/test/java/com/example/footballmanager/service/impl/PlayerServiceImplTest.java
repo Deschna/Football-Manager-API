@@ -1,10 +1,7 @@
 package com.example.footballmanager.service.impl;
 
-import com.example.footballmanager.exception.InsufficientBudgetException;
-import com.example.footballmanager.exception.PlayerAlreadyExistsException;
-import com.example.footballmanager.exception.PlayerAlreadyOnTeamException;
-import com.example.footballmanager.exception.PlayerNotFoundException;
-import com.example.footballmanager.exception.TeamNotFoundException;
+import com.example.footballmanager.exception.BadRequestException;
+import com.example.footballmanager.exception.EntityNotFoundException;
 import com.example.footballmanager.model.Player;
 import com.example.footballmanager.model.Team;
 import com.example.footballmanager.repository.PlayerRepository;
@@ -93,7 +90,7 @@ public class PlayerServiceImplTest {
     public void testGetByIdNotFound_NotOk() {
         when(playerRepository.findById(DEFAULT_PLAYER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(PlayerNotFoundException.class, () -> playerService.getById(DEFAULT_PLAYER_ID));
+        assertThrows(EntityNotFoundException.class, () -> playerService.getById(DEFAULT_PLAYER_ID));
     }
 
     @Test
@@ -108,7 +105,7 @@ public class PlayerServiceImplTest {
 
     @Test
     public void testCreateWithId_NotOk() {
-        assertThrows(PlayerAlreadyExistsException.class, () -> playerService.create(playerWithId));
+        assertThrows(BadRequestException.class, () -> playerService.create(playerWithId));
     }
 
     @Test
@@ -126,7 +123,7 @@ public class PlayerServiceImplTest {
     public void testUpdateByIdNotFound_NotOk() {
         when(playerRepository.existsById(DEFAULT_PLAYER_ID)).thenReturn(false);
 
-        assertThrows(PlayerNotFoundException.class,
+        assertThrows(EntityNotFoundException.class,
                 () -> playerService.updateById(DEFAULT_PLAYER_ID, playerWithoutInitialId));
     }
 
@@ -143,7 +140,7 @@ public class PlayerServiceImplTest {
     public void testDeleteByIdNotFound_NotOk() {
         when(playerRepository.existsById(DEFAULT_PLAYER_ID)).thenReturn(false);
 
-        assertThrows(PlayerNotFoundException.class, () -> playerService.deleteById(DEFAULT_PLAYER_ID));
+        assertThrows(EntityNotFoundException.class, () -> playerService.deleteById(DEFAULT_PLAYER_ID));
 
         verify(playerRepository, times(0)).deleteById(DEFAULT_PLAYER_ID);
     }
@@ -163,7 +160,7 @@ public class PlayerServiceImplTest {
     public void testAddPlayerAlreadyInTeamToAnotherTeam_NotOk() {
         playerWithId.setTeam(sellingTeam);
 
-        assertThrows(PlayerAlreadyOnTeamException.class,
+        assertThrows(BadRequestException.class,
                 () -> playerService.addUnassignedPlayerToTeam(playerWithId, buyingTeam));
     }
 
@@ -184,14 +181,14 @@ public class PlayerServiceImplTest {
 
     @Test
     public void testTransferPlayerToTeamNotBelongToTeam_NotOk() {
-        assertThrows(TeamNotFoundException.class, () -> playerService.transferPlayerToTeam(playerWithId, buyingTeam));
+        assertThrows(EntityNotFoundException.class, () -> playerService.transferPlayerToTeam(playerWithId, buyingTeam));
     }
 
     @Test
     public void testTransferPlayerToTeamHeAlreadyOn_NotOk() {
         playerWithId.setTeam(buyingTeam);
 
-        assertThrows(PlayerAlreadyOnTeamException.class,
+        assertThrows(BadRequestException.class,
                 () -> playerService.transferPlayerToTeam(playerWithId, buyingTeam));
     }
 
@@ -203,7 +200,7 @@ public class PlayerServiceImplTest {
         when(playerRepository.existsById(DEFAULT_PLAYER_ID)).thenReturn(true);
         when(playerRepository.save(playerWithId)).thenReturn(playerWithId);
 
-        assertThrows(InsufficientBudgetException.class,
+        assertThrows(BadRequestException.class,
                 () -> playerService.transferPlayerToTeam(playerWithId, buyingTeam));
     }
 }
