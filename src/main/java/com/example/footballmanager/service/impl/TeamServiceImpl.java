@@ -1,7 +1,7 @@
 package com.example.footballmanager.service.impl;
 
-import com.example.footballmanager.exception.TeamAlreadyExistsException;
-import com.example.footballmanager.exception.TeamNotFoundException;
+import com.example.footballmanager.exception.BadRequestException;
+import com.example.footballmanager.exception.EntityNotFoundException;
 import com.example.footballmanager.model.Team;
 import com.example.footballmanager.repository.TeamRepository;
 import com.example.footballmanager.service.TeamService;
@@ -18,7 +18,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public Team getById(Long id) {
         return teamRepository.findById(id).orElseThrow(
-                () -> new TeamNotFoundException("No team present with id " + id));
+                () -> new EntityNotFoundException("No team present with id " + id));
     }
 
     @Override
@@ -29,7 +29,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public Team create(Team team) {
         if (team.getId() != null) {
-            throw new TeamAlreadyExistsException("Can't save a new team with an existing id!");
+            throw new BadRequestException("Can't save a new team with an existing id!");
         }
         return teamRepository.save(team);
     }
@@ -37,7 +37,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public Team updateById(Long id, Team team) {
         if(!teamRepository.existsById(id)) {
-            throw new TeamNotFoundException("No team present with id " + id);
+            throw new EntityNotFoundException("No team present with id " + id);
         }
         team.setId(id);
         return teamRepository.save(team);
@@ -46,7 +46,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public void deleteById(Long id) {
         if(!teamRepository.existsById(id)) {
-            throw new TeamNotFoundException("No team present with id " + id);
+            throw new EntityNotFoundException("No team present with id " + id);
         }
         teamRepository.deleteById(id);
     }

@@ -1,7 +1,7 @@
 package com.example.footballmanager.service.impl;
 
-import com.example.footballmanager.exception.TeamAlreadyExistsException;
-import com.example.footballmanager.exception.TeamNotFoundException;
+import com.example.footballmanager.exception.BadRequestException;
+import com.example.footballmanager.exception.EntityNotFoundException;
 import com.example.footballmanager.model.Team;
 import com.example.footballmanager.repository.TeamRepository;
 import com.example.footballmanager.service.TeamService;
@@ -64,7 +64,7 @@ public class TeamServiceImplTest {
     public void testGetByIdNotFound_NotOk() {
         when(teamRepository.findById(DEFAULT_TEAM_ID)).thenReturn(Optional.empty());
 
-        assertThrows(TeamNotFoundException.class, () -> teamService.getById(DEFAULT_TEAM_ID));
+        assertThrows(EntityNotFoundException.class, () -> teamService.getById(DEFAULT_TEAM_ID));
     }
 
     @Test
@@ -79,7 +79,7 @@ public class TeamServiceImplTest {
 
     @Test
     public void testCreateWithId_NotOk() {
-        assertThrows(TeamAlreadyExistsException.class, () -> teamService.create(teamWithId));
+        assertThrows(BadRequestException.class, () -> teamService.create(teamWithId));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class TeamServiceImplTest {
     public void testUpdateByIdNotFound_NotOk() {
         when(teamRepository.existsById(DEFAULT_TEAM_ID)).thenReturn(false);
 
-        assertThrows(TeamNotFoundException.class, () -> teamService.updateById(DEFAULT_TEAM_ID, teamWithoutInitialId));
+        assertThrows(EntityNotFoundException.class, () -> teamService.updateById(DEFAULT_TEAM_ID, teamWithoutInitialId));
     }
 
     @Test
@@ -113,7 +113,7 @@ public class TeamServiceImplTest {
     public void testDeleteByIdNotFound_NotOk() {
         when(teamRepository.existsById(DEFAULT_TEAM_ID)).thenReturn(false);
 
-        assertThrows(TeamNotFoundException.class, () -> teamService.deleteById(DEFAULT_TEAM_ID));
+        assertThrows(EntityNotFoundException.class, () -> teamService.deleteById(DEFAULT_TEAM_ID));
         verify(teamRepository, times(0)).deleteById(DEFAULT_TEAM_ID);
     }
 }

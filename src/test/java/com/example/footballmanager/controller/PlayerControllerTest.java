@@ -5,9 +5,8 @@ import com.example.footballmanager.dto.request.PlayerRequestDto;
 import com.example.footballmanager.dto.request.TeamRequestDto;
 import com.example.footballmanager.dto.response.PlayerResponseDto;
 import com.example.footballmanager.dto.response.TeamResponseDto;
-import com.example.footballmanager.exception.PlayerAlreadyOnTeamException;
-import com.example.footballmanager.exception.PlayerNotFoundException;
-import com.example.footballmanager.exception.TeamNotFoundException;
+import com.example.footballmanager.exception.BadRequestException;
+import com.example.footballmanager.exception.EntityNotFoundException;
 import com.example.footballmanager.model.Player;
 import com.example.footballmanager.model.Team;
 import com.example.footballmanager.service.PlayerService;
@@ -210,7 +209,7 @@ public class PlayerControllerTest {
         when(playerService.getById(DEFAULT_PLAYER_ID)).thenReturn(player);
         when(teamService.getById(DEFAULT_TEAM_ID)).thenReturn(team);
         when(playerService.addUnassignedPlayerToTeam(player, team))
-                .thenThrow(new PlayerAlreadyOnTeamException("The player is already on the team"));
+                .thenThrow(new BadRequestException("The player is already on the team"));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/players/{playerId}/add-to-team?teamId={teamId}",
                         DEFAULT_PLAYER_ID, DEFAULT_TEAM_ID))
@@ -240,7 +239,7 @@ public class PlayerControllerTest {
         when(playerService.getById(DEFAULT_PLAYER_ID)).thenReturn(player);
         when(teamService.getById(DEFAULT_TEAM_ID)).thenReturn(team);
         when(playerService.transferPlayerToTeam(player, team))
-                .thenThrow(new TeamNotFoundException("Player does not belong to any team"));
+                .thenThrow(new EntityNotFoundException("Player does not belong to any team"));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/players/{playerId}/transfer?teamId={teamId}",
                         DEFAULT_PLAYER_ID, DEFAULT_TEAM_ID))
@@ -255,7 +254,7 @@ public class PlayerControllerTest {
         when(playerService.getById(DEFAULT_PLAYER_ID)).thenReturn(player);
         when(teamService.getById(DEFAULT_TEAM_ID)).thenReturn(team);
         when(playerService.transferPlayerToTeam(player, team))
-                .thenThrow(new PlayerAlreadyOnTeamException("Can't transfer a player to a team he's already on"));
+                .thenThrow(new BadRequestException("Can't transfer a player to a team he's already on"));
 
         mockMvc.perform(MockMvcRequestBuilders.post("/players/{playerId}/transfer?teamId={teamId}",
                         DEFAULT_PLAYER_ID, DEFAULT_TEAM_ID))
@@ -284,7 +283,7 @@ public class PlayerControllerTest {
     public void testUpdatePlayerByIdNotFound_NotOk() throws Exception {
         when(playerDtoMapper.toModel(playerRequestDto)).thenReturn(player);
         when(playerService.updateById(DEFAULT_PLAYER_ID, player))
-                .thenThrow(new PlayerNotFoundException("No player present with id " + DEFAULT_PLAYER_ID));
+                .thenThrow(new EntityNotFoundException("No player present with id " + DEFAULT_PLAYER_ID));
 
         mockMvc.perform(MockMvcRequestBuilders.put("/players/" + DEFAULT_PLAYER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -302,7 +301,7 @@ public class PlayerControllerTest {
 
     @Test
     public void testDeletePlayerByIdNotFound_NotOk() throws Exception {
-        doThrow(new PlayerNotFoundException("No player present with id " + DEFAULT_PLAYER_ID))
+        doThrow(new EntityNotFoundException("No player present with id " + DEFAULT_PLAYER_ID))
                 .when(playerService).deleteById(DEFAULT_PLAYER_ID);
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/players/{id}", DEFAULT_PLAYER_ID))
